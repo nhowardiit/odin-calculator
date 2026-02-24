@@ -1,0 +1,66 @@
+* {
+    font-family: Arial, Helvetica, sans-serif;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: stretch;
+    text-align: center;
+    height: 100vh;
+}
+
+header {
+    flex: 0;
+}
+
+main {
+    margin-top: 50px;
+    flex: 1;
+
+    display: flex;
+    justify-content: center;
+    align-content: stretch;
+    text-align: center;
+}
+
+.calc {
+    max-width: 1000px;
+}
+
+input {
+    margin-top: 10px;
+    flex-basis: 100%;
+}
+
+.buttons {
+    margin-top: 10px;
+    background-color: pink;
+    display: flex;
+    flex-wrap: wrap;
+    /* gap: 5px; */
+}
+
+button {
+    flex-basis: 25%;
+    aspect-ratio: 1/1;
+}
+
+.delete,
+.clear {
+    flex-basis: 37.5%;
+    aspect-ratio: 2/1;
+}
+
+footer {
+    flex: 0;
+}
