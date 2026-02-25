@@ -1,10 +1,10 @@
 # odin-calculator
 
-Calculator Project
-
-https://www.theodinproject.com/lessons/foundations-calculator
+[Try out the calculator](https://nhowardiit.github.io/odin-calculator/)
 
 ## Assignment
+
+https://www.theodinproject.com/lessons/foundations-calculator
 
 Your calculator is going to contain functions for all of the basic math operators you typically find on calculators, so start by creating functions for the following items and testing them in your browser’s console:
 
