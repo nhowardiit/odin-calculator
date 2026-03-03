@@ -1,103 +1,117 @@
 const screenElement = document.querySelector("input");
-const lastEquation = document.querySelector("p.lastEquation"); // broken?
-const operatorButtons = document.querySelectorAll("button.oper");
-const numberButtons = document.querySelectorAll("button.num");
-const otherButtons = document.querySelectorAll("button.other");
+const lastEquation = document.querySelector("p.lastEquation");
+const allButtons = document.querySelectorAll("button");
 
 const operators = ["+", "-", "*", "%"];
 const numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."];
 
 let history = [];
+let a, b, oper;
 
-document.addEventListener("keydown", (event) => {
-    const key = event.key;
-    console.log(key);
-    if (numbers.includes(key)) {
-        numberEvent(event, key);
-    } else if (key === "-" && screenElement.value.length == 0) {
-        // deferentiate between neg and substract
-        numberEvent(event, key);
-    } else if (operators.includes(key)) {
-        operatorEvent(event, key);
+function printScreen() {
+    console.log(`a: ${a}, oper: ${oper}, b: ${b}`);
+    if (a && oper && b) {
+        screenElement.value = `${a} ${oper} ${b}`;
+    } else if (a && oper) {
+        screenElement.value = `${a} ${oper}`;
+    } else if (a) {
+        screenElement.value = `${a}`;
     } else {
-        otherEvent(event, key);
-    }
-});
-
-numberButtons.forEach((button) => {
-    button.addEventListener("click", (event) => {
-        numberEvent(event, button.innerText);
-    });
-});
-
-function numberEvent(event, number) {
-    event.preventDefault();
-    if (number != "." || !screenElement.value.includes(".")) {
-        screenElement.value = screenElement.value + number;
+        screenElement.value = "";
     }
 }
 
-operatorButtons.forEach((button) => {
+document.addEventListener("keydown", (event) => {
+    console.log(event.key);
+    handleEvents(event, event.key);
+});
+
+allButtons.forEach((button) => {
     button.addEventListener("click", (event) => {
-        operatorEvent(event, button.innerText);
+        console.log(button.innerText);
+        handleEvents(event, button.innerText);
     });
 });
+
+function handleEvents(event, value) {
+    if (numbers.includes(value)) {
+        numberEvent(event, value);
+    } else if (value === "-" && screenElement.value.length == 0) {
+        // deferentiate between neg and substract
+        numberEvent(event, value);
+    } else if (operators.includes(value)) {
+        operatorEvent(event, value);
+    } else {
+        otherEvent(event, value);
+    }
+    printScreen();
+}
+
+function numberEvent(event, number) {
+    event.preventDefault();
+    if (!a) {
+        a = number;
+    } else if (a && !(oper || b)) {
+        a = a + number;
+    } else if (oper && !b) {
+        b = number;
+    } else if (b) {
+        b = b + number;
+    }
+}
 
 function operatorEvent(event, operator) {
     event.preventDefault();
     // only allow an operator to be added after a number
-    if (screenElement.value) {
+    if (a) {
         // check if another operator is present, if so go head and calculate current values
-        if (includesOperator(screenElement.value)) {
-            operate(screenElement.value);
+        if (b) {
+            operate();
         }
         // allow operator to be added
-        screenElement.value = `${screenElement.value} ${operator} `;
+        oper = operator;
     }
 }
-
-otherButtons.forEach((button) => {
-    button.addEventListener("click", (event) => {
-        otherEvent(event, button.innerText);
-    });
-});
 
 function otherEvent(event, value) {
     event.preventDefault();
-    if ((value === "=" || value === "Enter") && includesOperator(screenElement.value)) {
-        if (screenElement.value.length > 0) {
-            operate(screenElement.value);
-        }
-    } else if (value === "-") {
-        screenElement.value = screenElement.value + value;
+    if ((value === "=" || value === "Enter") && a && oper && b) {
+        operate();
+    } else if (value === "-" && !a) {
+        a = value;
     } else if (value === "delete" || value === "Backspace") {
-        screenElement.value = screenElement.value.slice(0, -1);
+        if (a && !(oper || b)) {
+            a = a.toString().slice(0, -1);
+        } else if (oper && !b) {
+            oper = null;
+        } else if (b) {
+            b = b.toString().slice(0, -1);
+        }
     } else if (value === "clear") {
         history = [];
-        lastEquation.innerText = "";
-        screenElement.value = "";
+        // needed so that history box does unrender when screen and history are cleared
+        lastEquation.innerText = "\u00A0";
+        a = null;
+        b = null;
+        oper = null;
     }
 }
 
-function includesOperator(screenValue) {
-    // slice here does not check first character incase of neg number
-    return operators.some((op) => screenValue.slice(1).includes(op));
-}
-
-function operate(text) {
-    history.push(text);
+function operate() {
+    history.push(screenElement.value);
     let value;
-    parsedText = text.split(" ");
-    let a = +parsedText[0];
-    let b = +parsedText[2];
-    let op = parsedText[1];
+    a = +a;
+    b = +b;
 
-    if (op === "%" && (a == 0 || b == 0)) {
+    if (oper === "%" && (a == 0 || b == 0)) {
         // figure out error handling
-        screenElement.value = "";
+        lastEquation.textContent = "Div 0 Error";
+        a = null;
+        b = null;
+        oper = null;
     } else {
         //calculate
-        switch (op) {
+        switch (oper) {
             case "+":
                 value = a + b;
                 break;
@@ -113,7 +127,10 @@ function operate(text) {
         }
 
         //display
-        lastEquation.textContent = text;
+        lastEquation.textContent = screenElement.value;
         screenElement.value = value;
+        a = value;
+        oper = null;
+        b = null;
     }
 }
